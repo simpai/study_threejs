@@ -33,7 +33,7 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
   const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
 
   // Text
-  const textGeometry = new TextGeometry("Tesla 666", {
+  const textGeometry = new TextGeometry("$TSLA 666", {
     font: font,
     size: 0.5,
     height: 0.2,
@@ -52,7 +52,7 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
   // Donuts
   const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 666; i++) {
     const donut = new THREE.Mesh(donutGeometry, material);
     donut.position.x = (Math.random() - 0.5) * 10;
     donut.position.y = (Math.random() - 0.5) * 10;
