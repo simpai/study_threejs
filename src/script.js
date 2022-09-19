@@ -52,14 +52,14 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
   // Donuts
   const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
 
-  for (let i = 0; i < 666; i++) {
+  for (let i = 0; i < 200; i++) {
     const donut = new THREE.Mesh(donutGeometry, material);
     donut.position.x = (Math.random() - 0.5) * 10;
     donut.position.y = (Math.random() - 0.5) * 10;
     donut.position.z = (Math.random() - 0.5) * 10;
     donut.rotation.x = Math.random() * Math.PI;
     donut.rotation.y = Math.random() * Math.PI;
-    const scale = Math.random();
+    const scale = Math.random() / 2;
     donut.scale.set(scale, scale, scale);
 
     scene.add(donut);
