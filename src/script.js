@@ -4,6 +4,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "lil-gui";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 
 /**
  * Base
@@ -20,6 +23,8 @@ const scene = new THREE.Scene();
 /**
  * Models
  */
+// const textureLoader = new THREE.TextureLoader();
+
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("/draco/");
 
@@ -28,8 +33,8 @@ gltfLoader.setDRACOLoader(dracoLoader);
 
 let mixer = null;
 
-gltfLoader.load("/models/Fox/glTF/Fox.gltf", (gltf) => {
-  gltf.scene.scale.set(0.025, 0.025, 0.025);
+gltfLoader.load("/models/SciFiHelmet/glTF/SciFiHelmet.gltf", (gltf) => {
+  //   gltf.scene.scale.set(0.25, 0.25, 0.25);
   scene.add(gltf.scene);
 
   // Animation
@@ -38,20 +43,73 @@ gltfLoader.load("/models/Fox/glTF/Fox.gltf", (gltf) => {
   action.play();
 });
 
+// /**
+//  * Floor
+//  */
+// const floor = new THREE.Mesh(
+//   new THREE.PlaneGeometry(10, 10),
+//   new THREE.MeshStandardMaterial({
+//     color: "#777777",
+//     metalness: 0,
+//     roughness: 0.5,
+//   })
+// );
+// floor.receiveShadow = true;
+// floor.rotation.x = -Math.PI * 0.5;
+// scene.add(floor);
+
 /**
- * Floor
+ * Fonts
  */
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 10),
-  new THREE.MeshStandardMaterial({
-    color: "#444444",
-    metalness: 0,
-    roughness: 0.5,
-  })
-);
-floor.receiveShadow = true;
-floor.rotation.x = -Math.PI * 0.5;
-scene.add(floor);
+const material = new THREE.MeshStandardMaterial({
+  color: "#777777",
+});
+const fontLoader = new FontLoader();
+fontLoader.load("/fonts/helvetiker.typeface.json", (font) => {
+  // Material
+
+  // Text
+  const textGeometry = new TextGeometry("$TSLA 666", {
+    font: font,
+    size: 0.5,
+    height: 0.2,
+    curveSegments: 12,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegments: 5,
+  });
+  textGeometry.center();
+
+  const text = new THREE.Mesh(textGeometry, material);
+  text.position.y = 2;
+
+  scene.add(text);
+});
+
+// Donuts
+const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
+
+for (let i = 0; i < 211; i++) {
+  const donut = new THREE.Mesh(donutGeometry, material);
+  donut.position.x = (Math.random() - 0.5) * 7;
+  donut.position.y = -1.5; //(Math.random() - 0.5) * 4;
+  donut.position.z = (Math.random() - 0.5) * 7;
+  donut.rotation.x = Math.random() * Math.PI;
+  donut.rotation.y = Math.random() * Math.PI;
+  const scale = Math.random() / 5;
+  donut.scale.set(scale, scale, scale);
+
+  scene.add(donut);
+}
+
+new RGBELoader().load("/royal_esplanade_2k.hdr", (texture) => {
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = texture; // 3차원 배경으로 사용
+  scene.environment = texture; // 광원으로 사용
+  //texture.dispose();
+});
 
 /**
  * Lights
