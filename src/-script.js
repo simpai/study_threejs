@@ -20,6 +20,37 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+const environmentMap = new RGBELoader().load(
+  "/royal_esplanade_2k.hdr",
+  (texture) => {
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    // texture.encoding = THREE.sRGBEncoding;
+    scene.background = texture; // 3차원 배경으로 사용
+    scene.environment = texture; // 광원으로 사용
+    //texture.dispose();
+  }
+);
+
+environmentMap.encoding = THREE.sRGBEncoding;
+
+/**
+ * Update all materials
+ */
+const updateAllMaterials = () => {
+  scene.traverse((child) => {
+    if (
+      child instanceof THREE.Mesh &&
+      child.material instanceof THREE.MeshStandardMaterial
+    ) {
+      child.material.envMap = environmentMap;
+      // child.material.envMapIntensity = 2.5;
+
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+};
+
 /**
  * Models
  */
@@ -33,30 +64,17 @@ gltfLoader.setDRACOLoader(dracoLoader);
 
 let mixer = null;
 
-gltfLoader.load("/models/SciFiHelmet/glTF/SciFiHelmet.gltf", (gltf) => {
-  //   gltf.scene.scale.set(0.25, 0.25, 0.25);
+gltfLoader.load("/models/FlightHelmet/glTF/FlightHelmet.gltf", (gltf) => {
+  gltf.scene.scale.set(3, 3, 3);
   scene.add(gltf.scene);
 
-  // Animation
-  mixer = new THREE.AnimationMixer(gltf.scene);
-  const action = mixer.clipAction(gltf.animations[2]);
-  action.play();
-});
+  updateAllMaterials();
 
-// /**
-//  * Floor
-//  */
-// const floor = new THREE.Mesh(
-//   new THREE.PlaneGeometry(10, 10),
-//   new THREE.MeshStandardMaterial({
-//     color: "#777777",
-//     metalness: 0,
-//     roughness: 0.5,
-//   })
-// );
-// floor.receiveShadow = true;
-// floor.rotation.x = -Math.PI * 0.5;
-// scene.add(floor);
+  // // Animation
+  // mixer = new THREE.AnimationMixer(gltf.scene);
+  // const action = mixer.clipAction(gltf.animations[2]);
+  // action.play();
+});
 
 /**
  * Fonts
@@ -71,7 +89,7 @@ fontLoader.load("/fonts/helvetiker.typeface.json", (font) => {
   // Text
   const textGeometry = new TextGeometry("$TSLA 666", {
     font: font,
-    size: 0.5,
+    size: 0.2,
     height: 0.2,
     curveSegments: 12,
     bevelEnabled: true,
@@ -103,13 +121,6 @@ for (let i = 0; i < 211; i++) {
 
   scene.add(donut);
 }
-
-new RGBELoader().load("/royal_esplanade_2k.hdr", (texture) => {
-  texture.mapping = THREE.EquirectangularReflectionMapping;
-  scene.background = texture; // 3차원 배경으로 사용
-  scene.environment = texture; // 광원으로 사용
-  //texture.dispose();
-});
 
 /**
  * Lights
@@ -163,6 +174,11 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(2, 2, 2);
 scene.add(camera);
 
+// const directionalLightCameraHelper = new THREE.CameraHelper(
+//   directionalLight.shadow.camera
+// );
+// scene.add(directionalLightCameraHelper);
+
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(0, 0.75, 0);
@@ -173,11 +189,14 @@ controls.enableDamping = true;
  */
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
+  antialias: true,
 });
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
 /**
  * Animate
